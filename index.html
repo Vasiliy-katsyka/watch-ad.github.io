@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Ad</title>
+    <style>
+    /* style.css */
+body {
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+p {
+    margin-bottom: 30px;
+    color: #666;
+}
+
+#watch-ad-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#watch-ad-button:hover {
+    background-color: #45a049;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Watch Ad</h1>
+        <p>Please watch the ad to unlock the video.</p>
+        <button id="watch-ad-button">Watch Ad</button>
+    </div>
+
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+    // script.js
+    // Initialize Adsgram SDK
+    const AdController = window.Adsgram.init({ blockId: "353" }); // Replace "353" with your actual block ID
+
+    // Function to show an ad
+    function showAd() {
+      AdController.show()
+        .then(result => {
+          if (result.done) {
+            // Call API/reward in your Flask app
+            // Get video ID from Telegram web app context
+            const videoId = Telegram.WebApp.getCurrentQuery(); // This is how you get the data from Telegram
+
+            // Make a POST request to your Flask API
+            fetch(`/api/reward?video_id=${videoId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => {
+              if (response.ok) {
+                // Close the web app if the API call is successful
+                Telegram.WebApp.close();
+              } else {
+                console.error('Error closing web app:', response.status);
+              }
+            })
+            .catch(error => {
+              console.error('Error making API call:', error);
+            });
+          }
+        })
+        .catch(result => {
+          console.error("Ad show error:", result.description);
+        });
+    }
+
+    // Add an event listener to the button
+    const watchAdButton = document.getElementById('watch-ad-button');
+    watchAdButton.addEventListener('click', showAd);
+</script>
+</body>
+</html>
